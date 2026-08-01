@@ -1,5 +1,6 @@
 import Student from "../models/student.js"
 import bcrypt, { genSalt } from "bcrypt";
+import jwt from "jsonwebtoken";
 export const registerStudent = async (req, res) => {
     const {studentName, studentRollNumber, studentEmail, studentPassword} = req.body;
     if(!studentName || !studentRollNumber ||!studentEmail || !studentPassword){
@@ -38,8 +39,10 @@ export const loginStudent = async (req, res) => {
     if(!checkPass){
         return res.status(401).json({msg : "Invalid Credentials"});
     }
-
-    res.status(200).json({msg : "User logged in successfully"});
+    const token = jwt.sign(
+        {id : userExists._id}, process.env.JWT_SECRET, {expiresIn : "30d"}
+    );
+    res.status(200).json({msg : "User logged in successfully", studentName:userExists.studentName, token});
 }
 
 export const getStudents = async (req, res)=>{
