@@ -1,6 +1,6 @@
 import Student from "../models/student.js"
-
-const registerStudent = async (req, res) => {
+import bcrypt, { genSalt } from "bcrypt";
+export const registerStudent = async (req, res) => {
     const {studentName, studentRollNumber, studentEmail, studentPassword} = req.body;
     if(!studentName || !studentRollNumber ||!studentEmail || !studentPassword){
        return res.status(400).json({msg : "Please fill in all the fields"});
@@ -13,10 +13,37 @@ const registerStudent = async (req, res) => {
     if(studentExists){
         return res.status(409).json({msg : "Student Already Exists"});
     }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(studentPassword, salt);
+
     const student = await Student.create({
-        studentName, studentEmail, studentRollNumber, studentPassword
+        studentName, studentEmail, studentRollNumber, studentPassword: hashedPassword
     })
     res.status(201).json({msg : "User created successfully"});
 }
 
-export default registerStudent;
+export const loginStudent = async (req, res) => {
+    const {studentEmail, studentPassword, } = req.body;
+    if(!studentEmail || !studentPassword){
+        return res.status(400).json({msg : "Please fill in all the fields"});
+    }
+    const userExists = await Student.findOne({
+        studentEmail
+    })
+
+    if(!userExists){
+        return res.status(400).json({msg : "Invalid Credentials"});
+    }
+    const checkPass = await bcrypt.compare(studentPassword, userExists.studentPassword);
+    if(!checkPass){
+        return res.status(401).json({msg : "Invalid Credentials"});
+    }
+
+    res.status(200).json({msg : "User logged in successfully"});
+}
+
+export const getStudents = async (req, res)=>{
+    const students = await Student.find();
+    res.status(200).json(students);
+}
+// export default registerStudent;
