@@ -1,6 +1,8 @@
 import Student from "../models/student.js"
 import bcrypt, { genSalt } from "bcrypt";
 import jwt from "jsonwebtoken";
+
+//Register Api
 export const registerStudent = async (req, res) => {
     const {studentName, studentRollNumber, studentEmail, studentPassword} = req.body;
     if(!studentName || !studentRollNumber ||!studentEmail || !studentPassword){
@@ -23,6 +25,8 @@ export const registerStudent = async (req, res) => {
     res.status(201).json({msg : "User created successfully"});
 }
 
+
+//Login Api
 export const loginStudent = async (req, res) => {
     const {studentEmail, studentPassword, } = req.body;
     if(!studentEmail || !studentPassword){
@@ -49,4 +53,8 @@ export const getStudents = async (req, res)=>{
     const students = await Student.find();
     res.status(200).json(students);
 }
-// export default registerStudent;
+
+// dashboard controller
+export const dashboard = (req, res) => {
+    res.send({msg : "Hey there, this is the dashboard"});
+}
